@@ -1,8 +1,8 @@
 # Port of the Processing Library for C
 
-Processing_rs is inspired by the creative coding library [Processing](https://processing.org/).
+proCessing is inspired by the creative coding library [Processing](https://processing.org/).
 
-Despite the name (which I should probably change), this library is not meant to be a prot of processing for Rust. It serves to provide a port of processing to C (mainly for my own enjoyment, and learning purpose).
+This library is not meant to be a port of processing for Rust. It serves to provide a port of processing to C (mainly for my own enjoyment, and learning).
 
 Currently, it doesn't work. Mainly because I'm dumb, but also because I'm learning graphics programming with WebGPU.
 
@@ -15,7 +15,8 @@ This project uses the following crates:
 - [env_logger](https://crates.io/crates/env_logger): For better logging of errors
 - [pollster](https://crates.io/crates/pollster): For running the winit event loop in a blocking way
 
-# How to run
+# Major rewrite going on rn. Might not work as of now.
+## How to run - Might not work as of now
 1. Clone the repo and compile it using `cargo build --release`.
 2. Copy the libprocessing.a file from `target/release` to your desired folder.
 3. Copy the bindings.h file from `ffi-test` to your desired folder.
