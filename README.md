@@ -16,7 +16,7 @@ This project uses the following crates:
 - [pollster](https://crates.io/crates/pollster): For running the winit event loop in a blocking way
 
 # Major rewrite going on rn. Might not work as of now.
-## How to run - Might not work as of now
+## How to run
 1. Clone the repo and compile it using `cargo build --release`.
 2. Copy the libprocessing.a file from `target/release` to your desired folder.
 3. Copy the bindings.h file from `ffi-test` to your desired folder.
