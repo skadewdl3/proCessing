@@ -1,7 +1,6 @@
 use crate::event::state::{PEvent, PEventCallback, set_event_state, get_event_state};
 
 pub mod window;
-pub mod state;
 pub mod event_loop;
 
 pub extern "C" fn p_init (setup: PEventCallback, draw: PEventCallback) {

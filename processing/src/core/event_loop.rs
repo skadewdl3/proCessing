@@ -1,9 +1,9 @@
 use std::time::{Instant, Duration};
 
-use wgpu::{Instance, InstanceDescriptor, Backends, RequestAdapterOptions, DeviceDescriptor, SurfaceConfiguration, TextureUsages, PresentMode, Color};
+use wgpu::{Instance, InstanceDescriptor, Backends, RequestAdapterOptions, DeviceDescriptor, SurfaceConfiguration, TextureUsages, PresentMode, Color, IndexFormat};
 use winit::{event_loop::{EventLoopBuilder, ControlFlow}, window::WindowBuilder, dpi::LogicalSize, monitor::MonitorHandle, event::{Event, WindowEvent}};
 
-use crate::{renderer::state::{get_renderer_state, set_renderer_state}, event::state::get_event_state, event::handle_event};
+use crate::{renderer::{state::{get_renderer_state, set_renderer_state}, shader::ShaderBuilder, vertex::Vertex}, event::state::get_event_state, event::handle_event, renderer::vertex::normalized_vtx};
 
 pub async fn start_event_loop () {
     let renderer_state = get_renderer_state();
@@ -102,10 +102,33 @@ pub async fn start_event_loop () {
         last_redraw_time = Some(Instant::now());
     }
 
+
+    let tgl_shader = ShaderBuilder::new()
+        .with_content(include_str!("../shaders/rect.wgsl"))
+        .with_label("Rectangle Shader")
+        .with_vertex_buffer(vec![
+            normalized_vtx!(0, 0),
+            normalized_vtx!(100, 0),
+            normalized_vtx!(0, 100),
+            normalized_vtx!(100, 100),
+
+        ])
+        .with_index_buffer(vec![0, 1, 2, 2, 1, 3])
+        .build();
+
+
+    set_renderer_state! {
+        shaders.push(tgl_shader);
+    }
+    
+
     event_loop.run(move |event, _, control_flow| {
-        set_renderer_state! {
-            shaders = vec![];
-        }
+        
+        
+        // set_renderer_state! {
+        //     shaders = vec![
+        //     ];
+        // }
 
         let current_time = Instant::now();
         let delta = current_time.duration_since(get_renderer_state().last_redraw_time.unwrap());
@@ -128,7 +151,7 @@ pub async fn start_event_loop () {
             let mut encoder = device.create_command_encoder(&wgpu::CommandEncoderDescriptor { label: None });
 
             {
-                let _rpass = encoder.begin_render_pass(&wgpu::RenderPassDescriptor {
+                let mut rpass = encoder.begin_render_pass(&wgpu::RenderPassDescriptor {
                     label: None,
                     color_attachments: &[Some(wgpu::RenderPassColorAttachment {
                         view: &view,
@@ -149,6 +172,23 @@ pub async fn start_event_loop () {
                 });
 
                 // loop over shaders and draw them here
+                for shader in &renderer_state.shaders {
+                    rpass.set_pipeline(&shader.pipeline);
+                    if let Some(vertex_buffer) = &shader.vertex_buffer {
+                        rpass.set_vertex_buffer(0, vertex_buffer.slice(..));
+                    }
+                    if let Some(index_buffer) = &shader.index_buffer {
+                        rpass.set_index_buffer(index_buffer.slice(..), IndexFormat::Uint32);
+                    }
+
+                    if shader.has_index_buffer {
+                        rpass.draw_indexed(0..shader.draw_count, 0, 0..1)
+                    }
+                    else {
+                        rpass.draw(0..shader.draw_count, 0..1);
+                    }
+                }
+
             }
         
             queue.submit(Some(encoder.finish()));
